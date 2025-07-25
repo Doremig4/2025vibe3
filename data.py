@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # CSV 파일 불러오기 (적절한 인코딩 설정)
-df = pd.read_csv("202506_202506_연령별인구현황_월간 남녀구분.csv", encoding='cp949', error_bad_lines=False)
+df = pd.read_csv("202506_202506_연령별인구현황_월간 남녀구분.csv", encoding='cp949', on_bad_lines='skip')
 
 # 서울특별시 전체 행 선택
 seoul_row = df.iloc[0]
