@@ -72,3 +72,25 @@ st_folium(m, width=1000, height=600)
 with st.expander("📋 북마크 목록 보기"):
     for bm in st.session_state.bookmarks:
         st.markdown(f"- **{bm['name']}** ({bm['lat']:.4f}, {bm['lon']:.4f})  \n  {bm['desc']}")
+
+from st_chat import message as st_message
+
+st.header("💬 채팅")
+
+# 세션 상태에 채팅 내역 저장
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+user_input = st.text_input("메시지를 입력하세요", key="chat_input")
+if st.button("전송", key="send_btn") and user_input.strip():
+    st.session_state.chat_history.append({"role": "user", "content": user_input})
+    # 예시: 간단한 자동응답
+    if "지도" in user_input:
+        bot_reply = "지도를 활용해 북마크를 추가해보세요!"
+    else:
+        bot_reply = "안녕하세요! 무엇을 도와드릴까요?"
+    st.session_state.chat_history.append({"role": "assistant", "content": bot_reply})
+
+# 채팅 내역 출력
+for chat in st.session_state.chat_history:
+    st_message(chat["content"], is_user=(chat["role"] == "user"))
