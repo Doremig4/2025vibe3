@@ -1,7 +1,17 @@
 import streamlit as st
-import folium
-from streamlit_folium import st_folium
-from geopy.geocoders import Nominatim
+
+# folium, streamlit-folium, geopy가 설치되어 있는지 확인
+try:
+    import folium
+    from streamlit_folium import st_folium
+    from geopy.geocoders import Nominatim
+except ModuleNotFoundError as e:
+    st.error(
+        f"필요한 패키지가 설치되어 있지 않습니다: {e.name}\n"
+        "아래 명령어로 설치 후 다시 실행하세요:\n"
+        "pip install streamlit folium streamlit-folium geopy"
+    )
+    st.stop()
 
 st.set_page_config(page_title="나만의 북마크 지도", layout="wide")
 
@@ -30,6 +40,8 @@ with st.form("bookmark_form"):
                 lat, lon = map(float, location_input.split(","))
             else:
                 location = geolocator.geocode(location_input)
+                if location is None:
+                    raise ValueError("주소를 찾을 수 없습니다.")
                 lat, lon = location.latitude, location.longitude
         except Exception as e:
             st.error(f"❌ 위치를 찾을 수 없습니다: {e}")
