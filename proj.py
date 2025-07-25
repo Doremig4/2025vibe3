@@ -2,39 +2,37 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.set_page_config(page_title="CSV 시각화 앱", layout="wide")
+st.title("📊 연령대별 자살률 시각화 (2023년 기준)")
 
-st.title("📊 CSV 파일 시각화 앱")
-st.write("업로드한 CSV 파일을 다양한 방식으로 시각화할 수 있습니다.")
-
-# CSV 업로드
+# CSV 불러오기
 uploaded_file = st.file_uploader("CSV 파일을 업로드하세요", type=["csv"])
 
 if uploaded_file:
-    df = pd.read_csv(uploaded_file, encoding='utf-8')
-    st.subheader("📄 데이터 미리보기")
-    st.dataframe(df, use_container_width=True)
+    try:
+        df = pd.read_csv(uploaded_file, encoding='utf-8')
+    except UnicodeDecodeError:
+        df = pd.read_csv(uploaded_file, encoding='cp949')
 
-    # 컬럼 선택
-    numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
-    all_cols = df.columns.tolist()
+    # 데이터 클리닝
+    df_clean = df.iloc[2:].copy()
+    df_clean.columns = ['연령별(1)', '연령별(2)', '자살 사망자수', '자살률']
+    df_clean = df_clean.reset_index(drop=True)
+    df_clean['자살률'] = pd.to_numeric(df_clean['자살률'], errors='coerce')
+    df_clean = df_clean.dropna(subset=['자살률'])
 
-    if numeric_cols:
-        st.subheader("📈 그래프 설정")
-        chart_type = st.selectbox("차트 종류", ["선 그래프", "막대 그래프", "산점도"])
+    # '합계'의 연령별 자살률만 추출
+    filtered_df = df_clean[df_clean['연령별(1)'] == '합계']
 
-        x_axis = st.selectbox("X축 선택", all_cols)
-        y_axis = st.multiselect("Y축 선택 (하나 이상)", numeric_cols, default=numeric_cols[:1])
+    # 시각화
+    st.subheader("연령대별 자살률 (단위: 10만명당 명)")
+    fig = px.bar(
+        filtered_df,
+        x='연령별(2)',
+        y='자살률',
+        title='연령대별 자살률 (2023년)',
+        labels={'자살률': '자살률 (10만명당 명)', '연령별(2)': '연령대'}
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
-        if x_axis and y_axis:
-            for y in y_axis:
-                if chart_type == "선 그래프":
-                    fig = px.line(df, x=x_axis, y=y, title=f"{y} vs {x_axis}")
-                elif chart_type == "막대 그래프":
-                    fig = px.bar(df, x=x_axis, y=y, title=f"{y} vs {x_axis}")
-                elif chart_type == "산점도":
-                    fig = px.scatter(df, x=x_axis, y=y, title=f"{y} vs {x_axis}")
-
-                st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.warning("시각화할 수 있는 숫자형 컬럼이 없습니다.")
+    # 데이터 테이블도 함께 표시
+    st.dataframe(filtered_df[['연령별(2)', '자살률']], use_container_width=True)
