@@ -58,17 +58,20 @@ with st.form("bookmark_form"):
 m = folium.Map(location=[36.5, 127.5], zoom_start=7)
 
 for bm in st.session_state.bookmarks:
-    popup_html = f"<b>{bm['name']}</b><br>{bm['desc']}"
-    folium.Marker(
-        location=[bm["lat"], bm["lon"]],
-        popup=popup_html,
-        icon=folium.Icon(color="blue", icon="bookmark")
-    ).add_to(m)
+    try:
+        folium.Marker(
+            location=[float(bm["lat"]), float(bm["lon"])],
+            popup=f"<b>{bm['name']}</b><br>{bm['desc']}",
+            icon=folium.Icon(color="blue", icon="bookmark")
+        ).add_to(m)
+    except Exception as e:
+        st.write(f"마커 추가 오류: {e}")
 
 # 지도 표시
 st_folium(m, width=1000, height=600)
 
 # 북마크 리스트 출력
 with st.expander("📋 북마크 목록 보기"):
+    st.write(f"현재 북마크 개수: {len(st.session_state.bookmarks)}")
     for bm in st.session_state.bookmarks:
         st.markdown(f"- **{bm['name']}** ({bm['lat']:.4f}, {bm['lon']:.4f})  \n  {bm['desc']}")
