@@ -73,7 +73,7 @@ with st.expander("📋 북마크 목록 보기"):
     for bm in st.session_state.bookmarks:
         st.markdown(f"- **{bm['name']}** ({bm['lat']:.4f}, {bm['lon']:.4f})  \n  {bm['desc']}")
 
-from st_chat import message as st_message
+from streamlit_chat import message
 
 st.header("💬 채팅")
 
@@ -93,4 +93,7 @@ if st.button("전송", key="send_btn") and user_input.strip():
 
 # 채팅 내역 출력
 for chat in st.session_state.chat_history:
-    st_message(chat["content"], is_user=(chat["role"] == "user"))
+    if chat["role"] == "user":
+        message(chat["content"], is_user=True)
+    else:
+        message(chat["content"])
