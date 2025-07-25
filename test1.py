@@ -1,24 +1,28 @@
 import streamlit as st
-import random
+import folium
+from streamlit_folium import st_folium
 
-st.title("가위바위보 게임")
+st.title("나만의 북마크 지도")
 
-choices = ["가위", "바위", "보"]
-user_choice = st.radio("당신의 선택은?", choices, horizontal=True)
+# 북마크 저장용 세션 상태
+if "bookmarks" not in st.session_state:
+    st.session_state["bookmarks"] = []
 
-if st.button("결과 확인!"):
-    computer_choice = random.choice(choices)
-    st.write(f"컴퓨터의 선택: {computer_choice}")
+# 입력 폼
+with st.form("bookmark_form"):
+    name = st.text_input("장소 이름")
+    lat = st.number_input("위도", value=37.5665, format="%.6f")
+    lon = st.number_input("경도", value=126.9780, format="%.6f")
+    submitted = st.form_submit_button("북마크 추가")
+    if submitted and name:
+        st.session_state["bookmarks"].append({"name": name, "lat": lat, "lon": lon})
 
-    # 승패 판정
-    if user_choice == computer_choice:
-        result = "무승부!"
-    elif (
-        (user_choice == "가위" and computer_choice == "보") or
-        (user_choice == "바위" and computer_choice == "가위") or
-        (user_choice == "보" and computer_choice == "바위")
-    ):
-        result = "승리!"
-    else:
-        result = "패배!"
-    st.subheader(result)
+# 지도 생성 (초기 위치: 서울)
+m = folium.Map(location=[37.5665, 126.9780], zoom_start=12)
+
+# 북마크 마커 추가
+for bm in st.session_state["bookmarks"]:
+    folium.Marker([bm["lat"], bm["lon"]], popup=bm["name"]).add_to(m)
+
+# 지도 표시
+st_folium(m, width=700, height=500)
