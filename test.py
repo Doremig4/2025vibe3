@@ -1,2 +1,2 @@
 import streamlit as st
-st.writes("Linear dolphin")
+st.write("Linear dolphin")
