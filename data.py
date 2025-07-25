@@ -25,20 +25,50 @@ if file_to_read:
     try:
         df = pd.read_csv(file_to_read, encoding='cp949', quoting=csv.QUOTE_NONE, on_bad_lines='skip')
         seoul_row = df.iloc[0]
+        # 연령대 컬럼 필터링
         age_columns = [col for col in df.columns if '_계_' in col and any(str(i) in col or '100세 이상' in col for i in range(101))]
+        age_columns_male = [col for col in df.columns if '_남_' in col and any(str(i) in col or '100세 이상' in col for i in range(101))]
+        age_columns_female = [col for col in df.columns if '_여_' in col and any(str(i) in col or '100세 이상' in col for i in range(101))]
+        
         ages = [col.split('_')[-1].replace('"', '') for col in age_columns]
-        population = [int(str(seoul_row[col]).replace(" ", "").replace('"', '').replace(',', '')) for col in age_columns]
+        population_total = [int(str(seoul_row[col]).replace(" ", "").replace('"', '').replace(',', '')) for col in age_columns]
+        population_male = [int(str(seoul_row[col]).replace(" ", "").replace('"', '').replace(',', '')) for col in age_columns_male]
+        population_female = [int(str(seoul_row[col]).replace(" ", "").replace('"', '').replace(',', '')) for col in age_columns_female]
 
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=ages, y=population, mode='lines+markers', name='서울특별시'))
-        fig.update_layout(
-            title='서울특별시 연령별 인구 구조 (2025년 6월)',
-            xaxis_title='연령',
-            yaxis_title='인구 수',
-            xaxis=dict(tickangle=45),
-            height=600
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        tabs = st.tabs(["합계", "남", "여"])
+        with tabs[0]:
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=ages, y=population_total, mode='lines+markers', name='서울특별시 합계'))
+            fig.update_layout(
+                title='서울특별시 연령별 인구 구조 (2025년 6월) - 합계',
+                xaxis_title='연령',
+                yaxis_title='인구 수',
+                xaxis=dict(tickangle=45),
+                height=600
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        with tabs[1]:
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=ages, y=population_male, mode='lines+markers', name='서울특별시 남자'))
+            fig.update_layout(
+                title='서울특별시 연령별 인구 구조 (2025년 6월) - 남',
+                xaxis_title='연령',
+                yaxis_title='인구 수',
+                xaxis=dict(tickangle=45),
+                height=600
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        with tabs[2]:
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=ages, y=population_female, mode='lines+markers', name='서울특별시 여자'))
+            fig.update_layout(
+                title='서울특별시 연령별 인구 구조 (2025년 6월) - 여',
+                xaxis_title='연령',
+                yaxis_title='인구 수',
+                xaxis=dict(tickangle=45),
+                height=600
+            )
+            st.plotly_chart(fig, use_container_width=True)
     except Exception as e:
         st.error(f"⚠️ 파일을 처리하는 중 오류가 발생했습니다: {e}")
 else:
