@@ -7,7 +7,7 @@ try:
     from geopy.geocoders import Nominatim
 except ModuleNotFoundError as e:
     st.error(
-        f"필요한 패키지가 설치되어 있지 않습니다: {e.name}\n"
+        "필요한 패키지가 설치되어 있지 않습니다: {e.name}\n"
         "아래 명령어로 설치 후 다시 실행하세요:\n"
         "pip install streamlit folium streamlit-folium geopy"
     )
