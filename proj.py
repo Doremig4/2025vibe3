@@ -20,8 +20,8 @@ if uploaded_file:
     df_clean['자살 사망자수'] = pd.to_numeric(df_clean['자살 사망자수'], errors='coerce')
     df_clean = df_clean.dropna(subset=['자살 사망자수'])
 
-    # '합계' 기준 필터링
-    filtered_df = df_clean[df_clean['연령별(1)'] == '합계']
+    # '합계' 기준 + '소계' 제외
+    filtered_df = df_clean[(df_clean['연령별(1)'] == '합계') & (df_clean['연령별(2)'] != '소계')]
 
     # 바 차트 생성
     st.subheader("연령대별 자살자 수 (단위: 명)")
