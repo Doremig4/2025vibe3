@@ -2,18 +2,21 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.set_page_config(page_title="CSV 시각화 앱", layout="wide")
+st.set_page_config(page_title="자살률(연령별) 통계 시각화", layout="wide")
+st.title("📊 자살률(연령별) 통계 시각화")
+st.write("출처: 통계청 | 단위: 명, 10만명당 명")
 
-st.title("📊 CSV 파일 시각화 앱")
-st.write("업로드한 CSV 파일을 다양한 방식으로 시각화할 수 있습니다.")
+# 업로드 없이 로컬 파일 자동 불러오기
+csv_path = "자살률(연령별)_20250725130840.csv"
+columns = ["연령별(1)", "연령별(2)", "자살 사망자수 (명)", "자살률 (10만명당 명)"]
+df = pd.read_csv(csv_path, encoding='utf-8', skiprows=3, names=columns)
+df = df.replace("-", pd.NA)
+df["자살 사망자수 (명)"] = pd.to_numeric(df["자살 사망자수 (명)"], errors="coerce")
+df["자살률 (10만명당 명)"] = pd.to_numeric(df["자살률 (10만명당 명)"], errors="coerce")
+df = df[~df["연령별(2)"].isin(["미상", "소계"])]
 
-# CSV 업로드
-uploaded_file = st.file_uploader("CSV 파일을 업로드하세요", type=["csv"])
-
-if uploaded_file:
-    df = pd.read_csv(uploaded_file, encoding='utf-8')
-    st.subheader("📄 데이터 미리보기")
-    st.dataframe(df, use_container_width=True)
+st.subheader("📄 데이터 미리보기")
+st.dataframe(df, use_container_width=True)
 
     # 컬럼 선택
     numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()

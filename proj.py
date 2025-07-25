@@ -2,37 +2,28 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.title("📊 연령대별 자살자 수 시각화 (2023년 기준)")
+st.set_page_config(page_title="자살률(연령별) 통계 시각화", layout="wide")
+st.title("📊 자살률(연령별) 통계 시각화")
+st.write("출처: 통계청 | 단위: 명, 10만명당 명")
 
-# CSV 업로드
-uploaded_file = st.file_uploader("CSV 파일을 업로드하세요", type=["csv"])
+# 업로드 없이 로컬 파일 자동 불러오기
+csv_path = "자살률(연령별)_20250725130840.csv"
+columns = ["연령별(1)", "연령별(2)", "자살 사망자수 (명)", "자살률 (10만명당 명)"]
+df = pd.read_csv(csv_path, encoding='utf-8', skiprows=3, names=columns)
+df = df.replace("-", pd.NA)
+df["자살 사망자수 (명)"] = pd.to_numeric(df["자살 사망자수 (명)"], errors="coerce")
+df["자살률 (10만명당 명)"] = pd.to_numeric(df["자살률 (10만명당 명)"], errors="coerce")
+df = df[~df["연령별(2)"].isin(["미상", "소계"])]
 
-if uploaded_file:
-    try:
-        df = pd.read_csv(uploaded_file, encoding='utf-8')
-    except UnicodeDecodeError:
-        df = pd.read_csv(uploaded_file, encoding='cp949')
+st.subheader("📄 데이터 미리보기")
+st.dataframe(df, use_container_width=True)
 
-    # 데이터 정리
-    df_clean = df.iloc[2:].copy()
-    df_clean.columns = ['연령별(1)', '연령별(2)', '자살 사망자수', '자살률']
-    df_clean = df_clean.reset_index(drop=True)
-    df_clean['자살 사망자수'] = pd.to_numeric(df_clean['자살 사망자수'], errors='coerce')
-    df_clean = df_clean.dropna(subset=['자살 사망자수'])
+tab1, tab2 = st.tabs(["자살 사망자수", "자살률"])
+with tab1:
+    fig1 = px.bar(df, x="연령별(2)", y="자살 사망자수 (명)", title="연령별 자살 사망자수 (명)")
+    st.plotly_chart(fig1, use_container_width=True)
+with tab2:
+    fig2 = px.bar(df, x="연령별(2)", y="자살률 (10만명당 명)", title="연령별 자살률 (10만명당 명)")
+    st.plotly_chart(fig2, use_container_width=True)
 
-    # '합계' 기준 + '소계' 제외
-    filtered_df = df_clean[(df_clean['연령별(1)'] == '합계') & (df_clean['연령별(2)'] != '소계')]
-
-    # 바 차트 생성
-    st.subheader("연령대별 자살자 수 (단위: 명)")
-    fig = px.bar(
-        filtered_df,
-        x='연령별(2)',
-        y='자살 사망자수',
-        title='연령대별 자살자 수 (2023년)',
-        labels={'자살 사망자수': '자살자 수 (명)', '연령별(2)': '연령대'}
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-    # 데이터 표시
-    st.dataframe(filtered_df[['연령별(2)', '자살 사망자수']], use_container_width=True)
+    
