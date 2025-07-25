@@ -38,7 +38,7 @@ if file_to_read:
         tabs = st.tabs(["합계", "남", "여"])
         with tabs[0]:
             fig = go.Figure()
-            fig.add_trace(go.Scatter(x=ages, y=population_total, mode='lines+markers', name='서울특별시 합계'))
+            fig.add_trace(go.Bar(x=ages, y=population_total, name='서울특별시 합계'))
             fig.update_layout(
                 title='서울특별시 연령별 인구 구조 (2025년 6월) - 합계',
                 xaxis_title='연령',
@@ -49,7 +49,7 @@ if file_to_read:
             st.plotly_chart(fig, use_container_width=True)
         with tabs[1]:
             fig = go.Figure()
-            fig.add_trace(go.Scatter(x=ages, y=population_male, mode='lines+markers', name='서울특별시 남자'))
+            fig.add_trace(go.Bar(x=ages, y=population_male, name='서울특별시 남자'))
             fig.update_layout(
                 title='서울특별시 연령별 인구 구조 (2025년 6월) - 남',
                 xaxis_title='연령',
@@ -60,7 +60,7 @@ if file_to_read:
             st.plotly_chart(fig, use_container_width=True)
         with tabs[2]:
             fig = go.Figure()
-            fig.add_trace(go.Scatter(x=ages, y=population_female, mode='lines+markers', name='서울특별시 여자'))
+            fig.add_trace(go.Bar(x=ages, y=population_female, name='서울특별시 여자'))
             fig.update_layout(
                 title='서울특별시 연령별 인구 구조 (2025년 6월) - 여',
                 xaxis_title='연령',
